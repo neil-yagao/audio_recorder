@@ -26,15 +26,17 @@ public class SwiftAudioRecorderPlugin: NSObject, FlutterPlugin, AVAudioRecorderD
             startTime = Date()
             if mPath == "" {
                 let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-                mPath = documentsPath + "/" + String(Int(startTime.timeIntervalSince1970)) + ".m4a"
+                mPath = documentsPath + "/" + String(Int(startTime.timeIntervalSince1970)) + ".pcm"
                 print("path: " + mPath)
             }
             let settings = [
                 AVFormatIDKey: getOutputFormatFromString(mExtension),
-                AVSampleRateKey: 12000,
+                AVSampleRateKey: 16000,
                 AVNumberOfChannelsKey: 1,
-                AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
-            ]
+                AVLinearPCMBitDepthKey: 16,
+                AVLinearPCMIsBigEndianKey:false,
+                AVLinearPCMIsFloatKey:false
+            ] as [String : Any]
             do {
                 try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord, with: AVAudioSessionCategoryOptions.defaultToSpeaker)
                 try AVAudioSession.sharedInstance().setActive(true)
@@ -96,6 +98,8 @@ public class SwiftAudioRecorderPlugin: NSObject, FlutterPlugin, AVAudioRecorderD
 
         func getOutputFormatFromString(_ format : String) -> Int {
             switch format {
+            case "wav":
+                return Int(kAudioFormatLinearPCM)
             case ".mp4", ".aac", ".m4a":
                 return Int(kAudioFormatMPEG4AAC)
             default :
